@@ -14,19 +14,6 @@ def rand_page_ref_str():
     return ''.join(random.choice(characters) for i in range(10))
 
 
-class LRUClock:
-    """Counter for keeping time inside of the LRU page-replacement algorithm.
-
-    tick: keeps track of how much time has passed.
-    increment(): increases tick by 1.
-    """
-    def __init__(self):
-        self.tick = 0
-
-    def increment(self):
-        self.tick += 1
-
-
 def counter_lru_page_replacement(reference_string, memory_size):
     """Counter-based LRU page-replacement algorithm.
 
@@ -39,12 +26,24 @@ def counter_lru_page_replacement(reference_string, memory_size):
     entry for that page. (see pg. 416)
     :return:
     """
+    class LRUClock:
+        """Counter for keeping time inside of the LRU page-replacement algorithm.
+
+        tick: keeps track of how much time has passed.
+        increment(): increases tick by 1.
+        """
+        def __init__(self):
+            self.tick = 0
+
+        def increment(self):
+            self.tick += 1
+
     memory = [None for x in range(memory_size)]
     clock = LRUClock()
     for c in reference_string:
         frame = {"#": c, "TOU": clock.tick}  # Frame number, time of use
         clock.increment()
-        # print(c)
+        print(c)
         # Would be easiest to check if frame were already in memory by using
         # if frame in memory:, but we need to ignore age comparison.
         if None in memory:  # Load frame
@@ -53,7 +52,7 @@ def counter_lru_page_replacement(reference_string, memory_size):
             loaded = False
             for f in memory:
                 if f["#"] is frame["#"]:
-                    # print("frame in memory")
+                    print("frame in memory")
                     memory[memory.index(f)] = frame
                     loaded = True
             if not loaded:
@@ -67,8 +66,8 @@ def counter_lru_page_replacement(reference_string, memory_size):
                         oldest_frame = f
                     index = memory.index(oldest_frame)
                 memory[index] = frame
-                # print("page replaced")
-        # print(memory)
+                print("page replaced")
+        print(memory)
 
 
 def opt_page_replacement(reference_str):
