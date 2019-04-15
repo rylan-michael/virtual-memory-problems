@@ -1,5 +1,6 @@
 import random
-
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def rand_page_ref_str():
     """Generate a random reference string.
@@ -24,7 +25,8 @@ def counter_lru_page_replacement(reference_string, memory_size):
     every memory reference. Whenever a reference to a page is made, the contents
     of the clock register are copied to the time-of-use filed in the page-table
     entry for that page. (see pg. 416)
-    :return:
+    :return: tuple of reference_string length, allocated memory space for page
+             frames and the number of page fault occurrences.
     """
     class LRUClock:
         """Counter for keeping time inside of the LRU page-replacement algorithm.
@@ -38,21 +40,37 @@ def counter_lru_page_replacement(reference_string, memory_size):
         def increment(self):
             self.tick += 1
 
+    page_fault_count = 0
     memory = [None for x in range(memory_size)]
     clock = LRUClock()
     for c in reference_string:
         frame = {"#": c, "TOU": clock.tick}  # Frame number, time of use
         clock.increment()
-        print(c)
+        # print(c)  # DEBUG PURPOSES
         # Would be easiest to check if frame were already in memory by using
         # if frame in memory:, but we need to ignore age comparison.
-        if None in memory:  # Load frame
-            memory[memory.index(None)] = frame
+
+        # Check if the frame is already loaded into memory. Since frames are
+        # loaded serially, if we hit a None element then that means the array
+        # is empty moving forward and won't contain the frame we are looking for.
+
+        if None in memory:
+            # Checks for page faults when the memory isn't full.
+            # The frame could already be loaded.
+            for f in memory:
+                if f is None:  # Frame isn't loaded into memory
+                    page_fault_count += 1
+                    memory[memory.index(None)] = frame
+                    break
+                elif f["#"] is frame["#"]:  # Frame is loaded
+                    # Since frame is already loaded, update the time value.
+                    index = memory.index(f)
+                    memory[index] = frame
+                    break
         else:
             loaded = False
             for f in memory:
-                if f["#"] is frame["#"]:
-                    print("frame in memory")
+                if f["#"] is frame["#"]:  # If frame in memory
                     memory[memory.index(f)] = frame
                     loaded = True
             if not loaded:
@@ -66,8 +84,9 @@ def counter_lru_page_replacement(reference_string, memory_size):
                         oldest_frame = f
                     index = memory.index(oldest_frame)
                 memory[index] = frame
-                print("page replaced")
-        print(memory)
+                page_fault_count += 1
+        # print(memory)  # DEBUG PURPOSES
+    return len(reference_string), memory_size, page_fault_count
 
 
 def opt_page_replacement(reference_str):
@@ -83,6 +102,32 @@ def opt_page_replacement(reference_str):
     return False
 
 
-# counter_lru_page_replacement(rand_page_ref_str(), 1)
+def analyze_page_replacement_performance():
+    ref_str = rand_page_ref_str()
+    data_set = {"mem_size": [], "page_fault_count": []}
+    for i in range(1, 8):
+        (ref_len, mem_size, page_fault_count) = counter_lru_page_replacement(ref_str, i)
+        # print(f"{ref_len} count reference string: {ref_str}\n"
+        #       f"\tmemory capacity: {mem_size}\n"
+        #       f"\t# of page faults: {page_fault_count}")
+        data_set["mem_size"].append(mem_size)
+        data_set["page_fault_count"].append(page_fault_count)
+
+    df = pd.DataFrame(data=data_set)
+
+    fig = plt.figure(figsize=(12, 7))
+    fig.suptitle(f"Page Replacement Algorithm Performance")
+    ax = fig.add_subplot(111)
+    ax.set_title("Counter-based LRU Implementation")
+    ax.text(6, 8, "ref_str: {0}".format(ref_str),
+            bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+    ax.set_xlabel("Number of Frames")
+    ax.set_ylabel("Number of Page Faults")
+
+    positions = [x for x in range(1, 8)]
+    plt.bar(positions, df["page_fault_count"].data.obj, width=0.7)
+    plt.xticks(positions, df["mem_size"].data.obj)
+    plt.show()
 # Static reference str used by book to test algorithm correctness
-counter_lru_page_replacement("70120304230321201701", 3)
+# counter_lru_page_replacement("70120304230321201701", 3)
+analyze_page_replacement_performance()
