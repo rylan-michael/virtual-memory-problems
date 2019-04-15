@@ -2,6 +2,7 @@ import random
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def rand_page_ref_str():
     """Generate a random reference string.
 
@@ -46,14 +47,12 @@ def counter_lru_page_replacement(reference_string, memory_size):
     for c in reference_string:
         frame = {"#": c, "TOU": clock.tick}  # Frame number, time of use
         clock.increment()
-        # print(c)  # DEBUG PURPOSES
         # Would be easiest to check if frame were already in memory by using
         # if frame in memory:, but we need to ignore age comparison.
 
         # Check if the frame is already loaded into memory. Since frames are
         # loaded serially, if we hit a None element then that means the array
         # is empty moving forward and won't contain the frame we are looking for.
-
         if None in memory:
             # Checks for page faults when the memory isn't full.
             # The frame could already be loaded.
@@ -85,7 +84,6 @@ def counter_lru_page_replacement(reference_string, memory_size):
                     index = memory.index(oldest_frame)
                 memory[index] = frame
                 page_fault_count += 1
-        # print(memory)  # DEBUG PURPOSES
     return len(reference_string), memory_size, page_fault_count
 
 
@@ -107,9 +105,6 @@ def analyze_page_replacement_performance():
     data_set = {"mem_size": [], "page_fault_count": []}
     for i in range(1, 8):
         (ref_len, mem_size, page_fault_count) = counter_lru_page_replacement(ref_str, i)
-        # print(f"{ref_len} count reference string: {ref_str}\n"
-        #       f"\tmemory capacity: {mem_size}\n"
-        #       f"\t# of page faults: {page_fault_count}")
         data_set["mem_size"].append(mem_size)
         data_set["page_fault_count"].append(page_fault_count)
 
@@ -128,6 +123,5 @@ def analyze_page_replacement_performance():
     plt.bar(positions, df["page_fault_count"].data.obj, width=0.7)
     plt.xticks(positions, df["mem_size"].data.obj)
     plt.show()
-# Static reference str used by book to test algorithm correctness
-# counter_lru_page_replacement("70120304230321201701", 3)
+
 analyze_page_replacement_performance()
