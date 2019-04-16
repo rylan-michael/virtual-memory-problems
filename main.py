@@ -1,9 +1,12 @@
 import random
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+from collections import deque
+import time
 
 
-def rand_page_ref_str():
+def rand_page_ref_str(page_numbers, reference_length):
     """Generate a random reference string.
 
     A reference string is used for evaluating performance of page replacement
@@ -12,8 +15,7 @@ def rand_page_ref_str():
     The reference string is 10 characters long with each character representing
     a frame number.
     """
-    characters = "0123456789"
-    return ''.join(random.choice(characters) for i in range(10))
+    return [random.choice(range(page_numbers)) for i in range(reference_length)]
 
 
 def counter_lru_page_replacement(reference_string, memory_size):
@@ -87,6 +89,26 @@ def counter_lru_page_replacement(reference_string, memory_size):
     return len(reference_string), memory_size, page_fault_count
 
 
+def stack_lru_page_replacement(reference_string, memory_size):
+    frame_stack = deque(maxlen=memory_size)
+    page_fault_count = 0
+    for c in reference_string:
+        if c in frame_stack:
+            # If the frame is in stack, move to top of stack.
+            frame_stack.remove(c)
+            frame_stack.append(c)
+        elif len(frame_stack) < memory_size:
+            # There is room on the stack to add frame.
+            frame_stack.append(c)
+            page_fault_count += 1
+        else:
+            # There is no room on stack, replace frame.
+            frame_stack.popleft()
+            frame_stack.append(c)
+            page_fault_count += 1
+    return len(reference_string), memory_size, page_fault_count
+
+
 def opt_page_replacement(reference_str, memory_size):
     """Optimal page-replacement algorithm.
 
@@ -131,7 +153,7 @@ def opt_page_replacement(reference_str, memory_size):
 
 
 def analyze_page_replacement_performance():
-    ref_str = rand_page_ref_str()
+    ref_str = rand_page_ref_str(page_numbers=10, reference_length=10)
     data_set = {"LRU": [], "OPT":  []}
     index = []
     for i in range(1, 8):
@@ -150,4 +172,30 @@ def analyze_page_replacement_performance():
     plt.show()
 
 
+def analyze_lru_runtime_performance():
+    reference_string = rand_page_ref_str(page_numbers=20, reference_length=50000)
+    data_set = {"counter": [], "stack": []}
+    index = []
+    for i in range(1, 11):
+        index.append(i)
+        time_start = time.time()
+        counter_lru_page_replacement(reference_string, i)
+        time_end = time.time()
+        data_set["counter"].append(time_end - time_start)
+        time_start = time.time()
+        stack_lru_page_replacement(reference_string, i)
+        time_end = time.time()
+        data_set["stack"].append(time_end - time_start)
+
+    df = pd.DataFrame(data=data_set, index=index)
+    lines = df.plot.line()
+    lines.set_xlabel("Number of Frames")
+    lines.set_ylabel("Running Time")
+    lines.set_yticklabels([])
+    plt.suptitle(f"LRU Runtime Performance Comparison")
+
+    plt.show()
+
+
 analyze_page_replacement_performance()
+analyze_lru_runtime_performance()
