@@ -119,7 +119,6 @@ def opt_page_replacement(reference_str, memory_size):
                     loaded = True
                     index = memory.index(p)
                     memory[index] = page
-                    # print("Replaced frame that would'nt be used again.")
                     break
                 else:  # Give each loaded frame a rank.
                     index = reference_str.index(p)
@@ -133,7 +132,6 @@ def opt_page_replacement(reference_str, memory_size):
 
 def analyze_page_replacement_performance():
     ref_str = rand_page_ref_str()
-    # data_set = {"algorithm": [], "memory size": [], "page fault count": []}
     data_set = {"LRU": [], "OPT":  []}
     index = []
     for i in range(1, 8):
@@ -150,55 +148,6 @@ def analyze_page_replacement_performance():
     ax.set_xlabel("Number of Frames")
     ax.set_ylabel("Number of Page Faults")
     plt.show()
-    # for i in range(1, 8):
-    #     (ref_len, mem_size, page_fault_count) = counter_lru_page_replacement(ref_str, i)
-    #     data_set["algorithm"].append("LRU")
-    #     data_set["memory size"].append(mem_size)
-    #     data_set["page fault count"].append(page_fault_count)
-    #     (ref_len, mem_size, page_fault_count) = opt_page_replacement(ref_str, i)
-    #     data_set["algorithm"].append("OPT")
-    #     data_set["memory size"].append(mem_size)
-    #     data_set["page fault count"].append(page_fault_count)
-
-    # df = pd.DataFrame(data=data_set)
-    # df.sort_values("memory size", axis=0, inplace=True)
-    # print(df)
-    # df.pivot(index="algorithm", columns="memory size", values="page fault count").plot(kind="bar")
-
-    # df = pd.DataFrame(data=data_set)
-    # print(df)
-    #
-    # df.plot.bar(x="memory size", y="page fault count")
-    # plt.show()
-    # data_set = {"mem_size_lru": [], "page_fault_count_lru": [],
-    #             "mem_size_opt": [], "page_fault_count_opt": []}
-    #
-    # for i in range(1, 8):
-    #     (ref_len, mem_size, page_fault_count) = counter_lru_page_replacement(ref_str, i)
-    #     data_set["mem_size_lru"].append(mem_size)
-    #     data_set["page_fault_count_lru"].append(page_fault_count)
-    #     (ref_len, mem_size, page_fault_count) = opt_page_replacement(ref_str, i)
-    #     data_set["mem_size_opt"].append(mem_size)
-    #     data_set["page_fault_count_opt"].append(page_fault_count)
-    #
-    # df = pd.DataFrame(data=data_set)
-    # # df.pivot(index="channel")
-    # fig = plt.figure(figsize=(12, 7))
-    # fig.suptitle(f"Page Replacement Algorithm Performance")
-    # ax = fig.add_subplot(111)
-    # ax.set_title("Counter-based LRU Implementation")
-    # ax.text(6, 8, "ref_str: {0}".format(ref_str),
-    #         bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
-    # ax.set_xlabel("Number of Frames")
-    # ax.set_ylabel("Number of Page Faults")
-    #
-    # positions = [x for x in range(1, 8)]
-    # plt.bar(positions, df["page_fault_count_lru"].data.obj, width=0.7, align="center")
-    # # plt.bar(positions, df["page_fault_count_opt"].data.obj, width=0.7, align="center")
-    # plt.xticks(positions, df["mem_size_lru"].data.obj)
-    # plt.show()
 
 
 analyze_page_replacement_performance()
-
-# opt_page_replacement(rand_page_ref_str(), 5)
